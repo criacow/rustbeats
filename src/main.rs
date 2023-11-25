@@ -1,4 +1,5 @@
 use lambda_http::{run, service_fn, Body, Error, Request, RequestExt, Response};
+use std::time::SystemTime;
 
 /// This is the main body for the function.
 /// Write your code inside it.
@@ -6,11 +7,11 @@ use lambda_http::{run, service_fn, Body, Error, Request, RequestExt, Response};
 /// - https://github.com/awslabs/aws-lambda-rust-runtime/tree/main/examples
 async fn function_handler(event: Request) -> Result<Response<Body>, Error> {
     // Extract some useful information from the request
-    let who = event
-        .query_string_parameters_ref()
-        .and_then(|params| params.first("name"))
-        .unwrap_or("world");
-    let message = format!("Hello {who}, this is an AWS Lambda HTTP request");
+    let time = SystemTime::now().duration_since(SystemTime::UNIX_EPOCH);
+    let seconds = time?.as_secs();
+    let beats = (((seconds + 3600) % 86400) * 10) / 864;
+
+    let message = format!("The current time is: {:03}", beats);
 
     // Return something that implements IntoResponse.
     // It will be serialized to the right response event automatically by the runtime
